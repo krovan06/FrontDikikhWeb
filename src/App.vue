@@ -7,8 +7,9 @@
   <main>
     <StartPage/>
     <AboutMe/>
-    <PriceComponent/>
     <Portfolio/>
+    <Service/>
+    <Contacts/>
   </main>
 </template>
 
@@ -26,39 +27,57 @@
 </style>
 
 <script>
-  import { ref, provide, onUnmounted, handleError } from 'vue';
-  import AboutMe from "./components/AboutMe.vue";
-  import StartPage from "./components/StartPage.vue";
-  import HeaderComponent from "./components/HeaderComponent.vue";
-  import PriceComponent from "./components/PriceComponent.vue";
-  import Portfolio from "./components/MyProduct.vue";
+import { ref, provide, onMounted, onUnmounted } from 'vue';
+import AboutMe from "./components/AboutMe.vue";
+import StartPage from "./components/StartPage.vue";
+import HeaderComponent from "./components/HeaderComponent.vue";
+import Portfolio from "./components/MyProduct.vue";
+import Service from "./components/ServiceComponent.vue";
+import Contacts from "./components/ContactsComponent.vue"
+import Lenis from 'lenis';
 
+export default {
+  components: {
+    HeaderComponent,
+    StartPage,
+    AboutMe,
+    Portfolio,
+    Service,
+    Contacts,
+  },
 
-  export default {
+  setup() {
+    const scrollY = ref(0);
 
-    setup() {
-      const scrollY = ref(0);
+    const handleScroll = () => {
+      scrollY.value = window.scrollY;
+    };
 
-      const handleScroll = () => {
-        scrollY.value = window.scrollY;
-      };
+    // Плавный скролл через Lenis
+    const lenis = new Lenis({
+      duration: 1.8,
+      easing: (t) => Math.min(1, 1.001 - Math.pow(2, -10 * t)),
+      smooth: true,
+      smoothTouch: false,
+    });
 
-      provide('scrollData', { scrollY, handleScroll });
+    const raf = (time) => {
+      lenis.raf(time);
+      requestAnimationFrame(raf);
+    };
+
+    onMounted(() => {
       window.addEventListener("scroll", handleScroll);
-      
-      onUnmounted( () => {
-        window.removeEventListener("scroll", handleError);
-      });
+      requestAnimationFrame(raf);
+    });
 
-      return {};
-    },
+    onUnmounted(() => {
+      window.removeEventListener("scroll", handleScroll);
+    });
 
-    components: {
-      HeaderComponent,
-      StartPage,
-      AboutMe,
-      PriceComponent,
-      Portfolio,
-    }
-  };
+    provide('scrollData', { scrollY, handleScroll });
+
+    return {};
+  },
+};
 </script>

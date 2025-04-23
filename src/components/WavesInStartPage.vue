@@ -16,13 +16,13 @@
 <style scoped>
   .waves-container {
     width: 100%;
-    max-width: none; /* Убираем возможные ограничения ширины */
+    max-width: none;
   }
 
   svg {
-    width: 100%; /* Убедимся, что SVG занимает всю ширину контейнера */
-    height: 100px; /* Фиксированная высота для контроля */
-    display: block; /* Убираем лишние отступы */
+    width: 100%; 
+    height: 100px; 
+    display: block; 
   }
 
   .waveFront {
@@ -44,7 +44,7 @@
     }
     100% {
       opacity: 1;
-      transform: translateY(0); /* Волны поднимаются в исходное положение */
+      transform: translateY(0);
     }
   }
 </style>
