@@ -1,7 +1,6 @@
 <template>
   <div class="HeaderColumn" ref="headerColumn">
     <div class="HeaderBlock" id="ElasticBlock">
-      <div class="SelectCircle"></div>
       <a href="#" @click.prevent="selectLink('about')" class="AboutMe oswald-text">ОБО МНЕ</a>
       <a href="#" @click.prevent="selectLink('portfolio')" class="Portfolio-link oswald-text">ПОРТФОЛИО</a>
       <a href="#" @click.prevent="selectLink('services')" class="Services-link oswald-text">УСЛУГИ</a>
@@ -39,65 +38,29 @@
   transition: color 0.5s ease, background-color 0.5s ease;
 }
 
-.SelectCircle {
-  position: absolute;
-  border-radius: 100%;
-  width: calc((1vh + 1vw) * 0.32);
-  height: calc((1vh + 1vw) * 0.32);
-  margin-top: 8.5%;
-  left: 0;
-  transform: translateX(-50%);
-  opacity: 0;
-  transition: transform 1s ease-in-out,
-              opacity 0.3s ease,
-              background-color 0.5s ease;
-  will-change: transform, opacity, background-color;
-}
-
-.AboutMe,
-.Portfolio-link,
-.Services-link,
-.Contacts-link {
+.oswald-text {
+  font-family: 'Oswald', sans-serif;
+  font-weight: 400;
+  transition: color 0.5s ease-in-out;
   text-decoration: none;
   font-size: calc((1vh + 1vw) * 0.9);
   white-space: nowrap;
   transition: opacity 0.3s ease-in-out;
 }
 
-.AboutMe { animation-delay: 0.5s; }
-.Portfolio-link { animation-delay: 0.8s; }
-.Services-link { animation-delay: 1.1s; }
-.Contacts-link { animation-delay: 1.4s; }
+.text-light { color: #ffffff; }
+.text-dark { color: #000000; }
+
+.fade { opacity: 0.7; }
+
+.active-link {
+  text-shadow: 0px 0px 14px rgba(255, 255, 255, 0.58);
+  color: rgb(125, 127, 131);
+}
 
 @keyframes ShowInUp {
   from { margin-bottom: 5vh; opacity: 0; }
   to { margin-bottom: 0; opacity: 1; }
-}
-
-.oswald-text {
-  font-family: 'Oswald', sans-serif;
-  font-weight: 400;
-  transition: color 0.5s ease-in-out;
-}
-
-.text-light {
-  color: #ffffff;
-}
-
-.text-dark {
-  color: #000000;
-}
-
-.bg-light {
-  background-color: #ffffff;
-}
-
-.bg-dark {
-  background-color: #000000;
-}
-
-.fade {
-  opacity: 0.7;
 }
 
 @keyframes fadeIn {
@@ -107,7 +70,7 @@
 </style>
 
 <script>
-import { throttle, debounce } from 'lodash';
+import { throttle } from 'lodash';
 
 export default {
   data() {
@@ -119,8 +82,6 @@ export default {
       resizeListener: null,
       isScrolling: false,
       scrollTimeout: null,
-      isHovering: false,
-      currentColorState: null,
     };
   },
   methods: {
@@ -134,33 +95,14 @@ export default {
       }
 
       this.selectedLink = link;
-      this.moveCircleToLink(link);
       this.scrollToSection(link);
+      this.updateActiveLink();
     },
 
     scrollToSection(link) {
       const targetId = this.getSectionId(link);
       const target = document.getElementById(targetId);
       target?.scrollIntoView({ behavior: 'smooth' });
-    },
-
-    moveCircleToLink(link) {
-      if (!this.isMounted) return;
-      
-      const circle = this.$el.querySelector('.SelectCircle');
-      const linkElement = this.getLinkElement(link);
-      
-      if (!circle || !linkElement) {
-        console.warn('Элементы не найдены:', { circle, linkElement });
-        return;
-      }
-
-      const linkRect = linkElement.getBoundingClientRect();
-      const headerRect = this.$el.querySelector('.HeaderBlock').getBoundingClientRect();
-      const position = linkRect.left - headerRect.left + linkRect.width / 2;
-
-      circle.style.transform = `translateX(${position}px)`;
-      circle.style.opacity = '1';
     },
 
     getSectionId(link) {
@@ -183,30 +125,20 @@ export default {
       return selector ? this.$el.querySelector(selector) : null;
     },
 
-    returnToSelected() {
-      if (this.isHovering || !this.selectedLink || !this.isMounted) return;
-      this.moveCircleToLink(this.selectedLink);
-    },
-
     getBackgroundColor() {
       const header = this.$refs.headerColumn;
-      if (!header) {
-        console.warn('Шапка не найдена');
-        return 'rgb(255, 255, 255)';
-      }
+      if (!header) return 'rgb(255, 255, 255)';
 
       const rect = header.getBoundingClientRect();
       const x = rect.left + rect.width / 2;
       const y = rect.bottom + 1;
 
-      const originalDisplay = header.style.display;
-      header.style.display = 'none';
+      const originalVisibility = header.style.visibility;
+      header.style.visibility = 'hidden';
 
       try {
         let element = document.elementFromPoint(x, y);
-        if (!element) {
-          return 'rgb(255, 255, 255)';
-        }
+        if (!element) return 'rgb(255, 255, 255)';
 
         let bgColor = window.getComputedStyle(element).backgroundColor;
         while (bgColor === 'rgba(0, 0, 0, 0)' && element.parentElement) {
@@ -216,21 +148,15 @@ export default {
 
         return bgColor || 'rgb(255, 255, 255)';
       } finally {
-        header.style.display = originalDisplay;
+        header.style.visibility = originalVisibility;
       }
     },
 
     getContrastColor(bgColor) {
-      if (!bgColor || typeof bgColor !== 'string') {
-        console.warn('Недопустимый цвет фона:', bgColor);
-        return '#000000';
-      }
-
+      if (!bgColor) return '#000000';
+      
       const rgbMatch = bgColor.match(/\d+/g);
-      if (!rgbMatch || rgbMatch.length < 3) {
-        console.warn('Не удалось разобрать RGB из:', bgColor);
-        return '#000000';
-      }
+      if (!rgbMatch || rgbMatch.length < 3) return '#000000';
 
       const [r, g, b] = rgbMatch.map(Number);
       const brightness = (r * 299 + g * 587 + b * 114) / 1000;
@@ -244,64 +170,40 @@ export default {
       const textColor = this.getContrastColor(bgColor);
       const isLight = textColor === '#ffffff';
 
-      if (this.currentColorState === isLight) return;
-      this.currentColorState = isLight;
-
-      const links = this.$el.querySelectorAll('.oswald-text');
-      const circle = this.$el.querySelector('.SelectCircle');
-
-      links.forEach(el => {
+      this.$el.querySelectorAll('.oswald-text').forEach(el => {
         el.classList.remove('text-light', 'text-dark');
         el.classList.add(isLight ? 'text-light' : 'text-dark');
       });
-
-      if (circle) {
-        circle.classList.remove('bg-light', 'bg-dark');
-        circle.classList.add(isLight ? 'bg-light' : 'bg-dark');
-      }
-
-      console.log('Цвет фона:', bgColor, 'isLight:', isLight);
     }, 200),
 
     handleScroll() {
       if (!this.isMounted) return;
 
-      const links = this.$el.querySelectorAll('.oswald-text');
-      links.forEach(el => {
-        el.classList.add('fade');
-        el.style.animation = 'none';
-      });
-
-      clearTimeout(this.scrollTimeout);
       this.isScrolling = true;
+      clearTimeout(this.scrollTimeout);
 
       this.scrollTimeout = setTimeout(() => {
         this.isScrolling = false;
-        links.forEach(el => {
-          el.classList.remove('fade');
-          el.style.animation = 'fadeIn 0.3s ease-in-out forwards';
-        });
+        this.updateHeaderColors();
       }, 150);
     },
 
-    updateCirclePosition: debounce(function(link) {
-      if (!this.isMounted || !link) return;
-      this.selectedLink = link;
-      this.moveCircleToLink(link);
-      console.log('Шар перемещён к:', link);
-    }, 300),
-
     handleIntersection(entries) {
-      if (!this.isMounted) return;
-
+      let bestEntry = null;
+      let maxRatio = 0;
       entries.forEach(entry => {
-        if (entry.isIntersecting) {
-          const link = this.getLinkFromTarget(entry.target);
-          if (link && link !== this.selectedLink) {
-            this.updateCirclePosition(link);
-          }
+        if (entry.isIntersecting && entry.intersectionRatio > maxRatio) {
+          maxRatio = entry.intersectionRatio;
+          bestEntry = entry;
         }
       });
+      if (bestEntry) {
+        const link = this.getLinkFromTarget(bestEntry.target);
+        if (link) {
+          this.selectedLink = link;
+          this.updateActiveLink();
+        }
+      }
     },
 
     getLinkFromTarget(target) {
@@ -311,11 +213,18 @@ export default {
         'portfolio-section': 'portfolio',
         'contacts-section': 'contacts'
       }[target.id] || null;
-    }
+    },
+
+    updateActiveLink() {
+      this.$el.querySelectorAll('.oswald-text').forEach(el => {
+        el.classList.remove('active-link');
+      });
+      const activeLink = this.getLinkElement(this.selectedLink);
+      activeLink?.classList.add('active-link');
+    },
   },
   mounted() {
     this.isMounted = true;
-    console.log('Шапка смонтирована');
 
     this.$nextTick(() => {
       const links = this.$el.querySelectorAll('.oswald-text');
@@ -324,51 +233,27 @@ export default {
         el.style.animation = 'ShowInUp 2.5s forwards';
       });
 
-      this.selectedLink = 'about';
-      this.moveCircleToLink('about');
-
-      this.updateHeaderColors();
       this.scrollListener = () => {
         this.handleScroll();
         this.updateHeaderColors();
       };
+      
       this.resizeListener = () => this.updateHeaderColors();
+      
       window.addEventListener('scroll', this.scrollListener);
       window.addEventListener('resize', this.resizeListener);
-    });
 
-    this.$el.querySelectorAll('.oswald-text').forEach(link => {
-      link.addEventListener('mouseenter', () => {
-        const linkType = [...link.classList].find(cls => 
-          ['AboutMe', 'Services-link', 'Portfolio-link', 'Contacts-link'].includes(cls)
-        );
-        
-        if (!linkType) return;
-        
-        const linkName = linkType.replace(/-link$/, '').toLowerCase();
-        this.isHovering = true;
-        this.moveCircleToLink(linkName);
-      });
-      
-      link.addEventListener('mouseleave', () => {
-        this.isHovering = false;
-        this.returnToSelected();
-      });
-    });
-
-    const sections = document.querySelectorAll(
-      '#about-text, #services-section, #portfolio-section, #contacts-section'
-    );
-    
-    if (sections.length) {
-      this.observer = new IntersectionObserver(this.handleIntersection, {
+      this.observer = new IntersectionObserver(this.handleIntersection.bind(this), {
         threshold: 0.2
       });
+
+      const sections = document.querySelectorAll('#about-text, #services-section, #portfolio-section, #contacts-section');
       
       sections.forEach(section => this.observer.observe(section));
-    } else {
-      console.warn('Секции не найдены.');
-    }
+
+      // Force initial check
+      window.dispatchEvent(new Event('resize'));
+    });
   },
   beforeUnmount() {
     this.isMounted = false;

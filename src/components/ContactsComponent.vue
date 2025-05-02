@@ -1,23 +1,31 @@
 <template>
   <div class="ContactsHolst" ref="contactsHolst">
-    <div class="ContactsBlock">
+    <div class="ContactsBlock section" id="contacts-section">
       <div class="ContactsContentBlock">
-        <!-- Контент блока -->
+
+        <div class="MessengersBlock">
+
+          <div class="TestBlock">
+            <div class="IconMessengers"></div>
+          </div>
+
+          <div class="TestBlock">
+            <div class="IconMessengers"></div>
+          </div>
+
+          <div class="TestBlock">
+            <div class="IconMessengers"></div>
+          </div>
+
+
+        </div>
+
       </div>
       <div class="AvtorName">
         <div class="AvtorText poppins-text">
-          <span
-            v-for="(letter, index) in letters"
-            :key="index"
-            class="letter"
-            :style="{
-              transform: `translateY(${getTranslateY(index)}px)`,
-              opacity: getOpacity(index),
-              transition: `transform 0.5s ease-out, opacity 0.5s ease-out`
-            }"
-          >
-            {{ letter }}
-          </span>
+          <div class="AvtorText poppins-text WordAnimation">
+            DIKIKH
+          </div>
         </div>
       </div>
     </div>
@@ -34,7 +42,7 @@
 }
 
 .ContactsBlock {
-  width: 100%;
+  width: 100vw;
   border-radius: 25px;
   height: 90%;
   margin-top: 1vh;
@@ -42,6 +50,92 @@
   align-items: center;
   justify-content: center;
   background-color: rgb(231, 244, 255);
+}
+
+.ContactsContentBlock {
+  width: 85%;
+  height: 90%;
+  border: 1px solid black;
+}
+
+.MessengersBlock {
+  width: 30%;
+  height: 100%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-direction: column;
+  gap: 10vh;
+  border: 1px solid red;
+
+  position: relative;
+  z-index: 1;
+}
+
+.TestBlock {
+  width: 60%;
+  border: 1px solid green;
+}
+
+.IconMessengers {
+  width: 90px;
+  height: 90px;
+  background-color: rgb(21, 23, 27);
+  border-radius: 100%;
+  transition: 0.1s;
+}
+
+.IconMessengers:hover {
+  cursor: pointer;
+  background-color: black
+}
+
+.IconMessengers:active {
+  background-color: rgb(38, 38, 38);
+}
+
+.ButtonMessengers {
+  margin-right: 10%;
+  width: 60%;
+  height: 60%;
+  background-color: rgb(21, 23, 27);
+  border-radius: 15px;
+  transition: 0.2s;
+
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: aliceblue;
+  letter-spacing: 4px;
+}
+
+.ButtonAnimation {
+  animation: buttonShow 1s forwards;
+}
+
+@keyframes buttonShow {
+  0% {
+    opacity: 0;
+    width: 10%;
+  }
+
+  100% {
+    opacity: 1;
+    width: 60%;
+  }
+}
+
+.ButtonMessengers:hover {
+  cursor: pointer;
+  color: rgb(21, 23, 27);
+  background-color: aliceblue;
+  border: 1px solid rgb(21, 23, 27);
+}
+
+.ButtonMessengers:active {
+  height: 55%;
+  background-color: rgb(151, 158, 164);
+  border: 1px solid rgb(255, 255, 255);
 }
 
 .AvtorName {
@@ -57,10 +151,15 @@
   color: rgb(21, 23, 27);
   font-size: calc((1vh + 1vw) * 17);
   letter-spacing: calc((1vh + 1vw) * 1.5);
+  transition: 3s;
 }
 
-.letter {
-  display: inline-block;
+.AvtorText:hover {
+  cursor: default;
+  color: rgb(32, 36, 45);
+  /*
+  text-shadow: 20px -8px 18px rgb(35, 35, 35);
+  */
 }
 
 .poppins-text {
@@ -68,59 +167,33 @@
   font-weight: 600;
   font-style: normal;
 }
+
+.WordAnimation {
+  animation: wordAnimation 2s forwards;
+}
+
+.oswald-text {
+  font-family: 'Oswald', sans-serif;
+  font-weight: 500;
+}
+
+@keyframes wordAnimation {
+  0% {
+    margin-top: 12vh;
+    opacity: 0;
+    filter: blur(10px);
+  }
+
+  100% {
+    margin-top: 0px;
+    opacity: 1;
+    filter: blur(0px);
+  }
+}
 </style>
 
 <script>
-import { inject, ref, onMounted } from 'vue';
+  export default {
 
-export default {
-  name: 'StartPage',
-  setup() {
-    const scrollY = inject("scrollData");
-    const contactsHolst = ref(null);
-    const letters = ['D', 'I', 'K', 'I', 'K', 'H'];
-    const numLetters = letters.length;
-    const speeds = Array.from({ length: numLetters }, (_, i) => -0.1 - 0.02 * i); // Разные скорости для параллакса
-    let componentHeight = ref(0);
-
-    onMounted(() => {
-      // Получаем высоту компонента
-      componentHeight.value = contactsHolst.value.offsetHeight;
-      // Обновляем высоту при изменении размера окна
-      window.addEventListener('resize', () => {
-        componentHeight.value = contactsHolst.value.offsetHeight;
-      });
-    });
-
-    const getTranslateY = (index) => {
-      const maxScroll = componentHeight.value; // Максимальная прокрутка внутри компонента
-      const translateY = speeds[index] * scrollY.value;
-      // Ограничиваем движение, чтобы буквы выровнялись внизу
-      if (scrollY.value >= maxScroll) {
-        return 0; // Все буквы выровнены в конце
-      }
-      return Math.min(translateY, 100); // Ограничиваем движение вниз
-    };
-
-    const getOpacity = (index) => {
-      const fadeStart = componentHeight.value - numLetters * 100 + index * 100;
-      const fadeDistance = 100;
-      if (scrollY.value < fadeStart) {
-        return 0; // Буква невидима
-      } else if (scrollY.value >= fadeStart + fadeDistance) {
-        return 1; // Буква полностью видима
-      } else {
-        return (scrollY.value - fadeStart) / fadeDistance; // Плавное появление
-      }
-    };
-
-    return {
-      scrollY,
-      letters,
-      getTranslateY,
-      getOpacity,
-      contactsHolst,
-    };
-  },
-};
+  }
 </script>
