@@ -6,15 +6,21 @@
         <div class="MessengersBlock">
 
           <div class="TestBlock">
-            <div class="IconMessengers"></div>
+            <div class="IconMessengers">
+              <div class="TextBlock oswald-text">TG</div>
+            </div>
           </div>
 
           <div class="TestBlock">
-            <div class="IconMessengers"></div>
+            <div class="IconMessengers">
+              <div class="TextBlock oswald-text">VK</div>
+            </div>
           </div>
 
           <div class="TestBlock">
-            <div class="IconMessengers"></div>
+            <div class="IconMessengers">
+              <div class="TextBlock oswald-text">WH</div>
+            </div>
           </div>
 
 
@@ -55,7 +61,6 @@
 .ContactsContentBlock {
   width: 85%;
   height: 90%;
-  border: 1px solid black;
 }
 
 .MessengersBlock {
@@ -66,7 +71,6 @@
   justify-content: center;
   flex-direction: column;
   gap: 10vh;
-  border: 1px solid red;
 
   position: relative;
   z-index: 1;
@@ -74,7 +78,10 @@
 
 .TestBlock {
   width: 60%;
-  border: 1px solid green;
+}
+
+.TextBlock {
+  color: white;
 }
 
 .IconMessengers {
@@ -82,6 +89,11 @@
   height: 90px;
   background-color: rgb(21, 23, 27);
   border-radius: 100%;
+
+  display: flex;
+  align-items: center;
+  justify-content: center;
+
   transition: 0.1s;
 }
 
