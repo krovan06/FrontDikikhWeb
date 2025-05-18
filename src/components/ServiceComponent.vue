@@ -1,8 +1,7 @@
 <template>
   <div class="ServiceComponentHolst">
-    <div class="ServiceContainer section" id="services-section">
-
-      <div class="ServiceInteractive">
+    <div class="ServiceContainer">
+      <div class="ServiceInteractive section" id="services-section">
         <div class="slider-viewport">
           <div
             class="slides-wrapper"
@@ -10,41 +9,57 @@
           >
             <div
               class="slide"
-              v-for="(slide, idx) in serviceNames"
-              :key="idx"
+              v-for="(block, idx) in blocks"
+              :key="block.id"
               :class="{ active: idx === activeIndex, inactive: idx !== activeIndex }"
             >
-              Контент слайда «{{ slide }}»
+              <div class="SliderImage" v-html="block.svg_content"></div>
             </div>
           </div>
         </div>
       </div>
-
       <div class="ServiceContentContainer">
-        <div class="Line" v-for="(item, idx) in serviceNames" :key="idx">
+        <div class="Line" v-for="(block, idx) in blocks" :key="block.id">
           <div class="Service" @mouseenter="setActive(idx)">
-            <p class="ServiceText poppins-text">{{ item }}</p>
+            <p class="ServiceText poppins-text">{{ block.title }}</p>
           </div>
         </div>
       </div>
-
     </div>
   </div>
 </template>
 
 <script>
+import { ref, onMounted } from 'vue';
+import axios from 'axios';
+
 export default {
-  name: 'ServiceSlider',
-  data() {
-    return {
-      serviceNames: ['Бэкенд', 'Фронтенд', 'Дизайн', 'Сайт под ключ'],
-      activeIndex: 0,
+  name: 'ServiceComponent',
+  setup() {
+    const blocks = ref([]);
+    const activeIndex = ref(0);
+
+    const setActive = (index) => {
+      activeIndex.value = index;
     };
-  },
-  methods: {
-    setActive(idx) {
-      this.activeIndex = idx;
-    },
+
+    const fetchBlocks = async () => {
+      try {
+        const response = await axios.get('http://localhost:8000/api/price-blocks/');
+        console.log('Данные из API:', response.data);
+        blocks.value = response.data;
+      } catch (error) {
+        console.error('Ошибка при загрузке данных:', error);
+      }
+    };
+
+    onMounted(fetchBlocks);
+
+    return {
+      blocks,
+      activeIndex,
+      setActive,
+    };
   },
 };
 </script>
@@ -56,6 +71,15 @@ export default {
   overflow: hidden;
   background-color: black;
   display: flex;
+  justify-content: center;
+}
+
+.SliderImage {
+  width: 80%;
+  height: 80%;
+  border-radius: 20px;
+  display: flex;
+  align-items: center;
   justify-content: center;
 }
 
@@ -171,5 +195,19 @@ export default {
   font-family: 'Poppins', sans-serif;
   font-weight: 600;
   font-style: normal;
+}
+
+@media (max-width: 1170px) {
+  .ServiceText {
+    font-size: calc((1vh + 1vw) * 3);
+  }
+
+  .slider-viewport {
+    display: none;
+  }
+  
+  .Service {
+    justify-content: center;
+  }
 }
 </style>

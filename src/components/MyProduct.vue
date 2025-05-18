@@ -13,9 +13,9 @@
           :class="block.blockClass"
           v-show="visibleLines[lineIndex]"
         >
-          <div :class="['MyProjectPhoto', block.photoClass]"></div>
+          <div :class="['MyProjectPhoto', block.photoClass]" :style="{backgroundImage: block.img}"></div>
           <div class="MyProjectInfo">
-            <div class="MyProjectInfo_Logo"></div>
+            <div class="MyProjectInfo_Logo" :style="{backgroundImage: block.logoImg}"></div>
             <div class="MyProjectInfo_Text">
               <div class="ProjectName poppins-text">{{ block.projectName }}</div>
               <div class="OtherProjectInfo oswald-text">{{ block.info }}</div>
@@ -67,7 +67,7 @@
     background-color: azure;
     background-size: cover;
     background-position: center;
-    background-repeat: no-repeats;  
+    background-repeat: no-repeat;  
   }
 
   .Normal {
@@ -100,6 +100,8 @@
     width: 52px;
     height: 52px;
     border-radius: 13px;
+    background-position: center;
+    background-size: cover;
     background-color: rgb(48, 50, 50);
   }
 
@@ -138,7 +140,7 @@
     .Normal {
       width: calc(100vw * 0.89);
     }
-
+    
     .BigPicture {
       display: none;
     }
@@ -159,106 +161,102 @@
 
 <script setup>
 import { ref, onMounted, onUnmounted, nextTick } from 'vue'
+import axios from 'axios'
 
+// ------------ 1. Рефы и реактивка ------------
 const portfolioRef = ref(null)
+const lines        = ref([])
+const visibleLines = ref([])
+const lineRefs     = ref([])
+const observers    = ref([])
 
-// Данные линий
-const lines = ref([
+const template = [
   [
-    {
-      photoClass: 'Normal',
-      projectName: 'One',
-      info: 'PRODUCT DESIGN, WEBSITE',
-      blockClass: 'ContentBlock AnimationShow',
-    },
-    {
-      photoClass: 'Medium',
-      projectName: 'Podyx',
-      info: 'PRODUCT DESIGN, WEBSITE',
-      blockClass: 'ContentBlock BigPicture AnimationShow',
-    },
+    { photoClass: 'Normal', blockClass: 'ContentBlock AnimationShow' },
+    { photoClass: 'Medium', blockClass: 'ContentBlock BigPicture AnimationShow' },
   ],
   [
-    {
-      photoClass: 'Normal',
-      projectName: 'Podyx',
-      info: 'PRODUCT DESIGN, WEBSITE',
-      blockClass: 'ContentBlock AnimationShow',
-    },
-    {
-      photoClass: 'Normal',
-      projectName: 'Podyx',
-      info: 'PRODUCT DESIGN, WEBSITE',
-      blockClass: 'ContentBlock BigPicture AnimationShow',
-    },
-    {
-      photoClass: 'Normal',
-      projectName: 'Podyx',
-      info: 'PRODUCT DESIGN, WEBSITE',
-      blockClass: 'ContentBlock BigPicture AnimationShow',
-    },
+    { photoClass: 'Normal', blockClass: 'ContentBlock AnimationShow' },
+    { photoClass: 'Normal', blockClass: 'ContentBlock BigPicture AnimationShow' },
+    { photoClass: 'Normal', blockClass: 'ContentBlock BigPicture AnimationShow' },
   ],
   [
-    {
-      photoClass: 'Big',
-      projectName: 'Podyx',
-      info: 'PRODUCT DESIGN, WEBSITE',
-      blockClass: 'ContentBlock AnimationShow',
-    },
+    { photoClass: 'Big',    blockClass: 'ContentBlock AnimationShow' },
   ],
-])
+]
 
-// Реактивные переменные
-const visibleLines = ref(Array(lines.value.length).fill(false))
-const lineRefs = ref([])
-const observers = ref([])
+// Строит структуру lines из API-ответа
+function buildLines(apiData) {
+  const groups = apiData.reduce((acc, item) => {
+    (acc[item.photo_class] = acc[item.photo_class] || []).push(item)
+    return acc
+  }, {})
 
-// Функция для установки ссылок
-const setLineRef = (el, index) => {
-  if (el) {
-    lineRefs.value[index] = el
-  }
+  return template.map(row =>
+    row.map(slot => {
+      const project = (groups[slot.photoClass] || []).shift() || {}
+      return {
+        photoClass: slot.photoClass,
+        projectName: project.project_name || 'NoName',
+        info:        project.info         || 'NoInfo',
+        img:         project.imageUrl     ? `url(${project.imageUrl})` : '',
+        logoImg:     project.logoUrl      ? `url(${project.logoUrl})`  : `url(/default-logo.png)`,
+        blockClass:  slot.blockClass,
+      }
+    })
+  )
+}
+
+// Помогает собрать refs из v-for
+const setLineRef = (el, idx) => {
+  if (el) lineRefs.value[idx] = el
 }
 
 onMounted(async () => {
-  // Наблюдатель для изменения цвета фона PortfolioBlock
+  // --- A) Загрузка данных и инициализация lines/visibleLines ---
+  try {
+    const { data } = await axios.get('http://localhost:8000/api/portfolio-projects/')
+    lines.value = buildLines(data)
+  } catch (err) {
+    console.error('Ошибка при загрузке портфолио:', err)
+    lines.value = buildLines([])
+  }
+  visibleLines.value = Array(lines.value.length).fill(false)
+
+  // Ждём, чтобы Vue добавил все containers в DOM
+  await nextTick()
+
+  // --- B) Observer для фона PortfolioBlock ---
   if (portfolioRef.value) {
-    const portfolioObserver = new IntersectionObserver(
+    const portObs = new IntersectionObserver(
       ([entry]) => {
-        if (entry.isIntersecting) {
-          portfolioRef.value.style.backgroundColor = '#04030F'
-        } else {
-          portfolioRef.value.style.backgroundColor = '#15171b'
-        }
+        portfolioRef.value.style.backgroundColor =
+          entry.isIntersecting ? '#08080a' : '#15171b'
       },
       { threshold: 0.38 }
     )
-    portfolioObserver.observe(portfolioRef.value)
-    observers.value.push(portfolioObserver)
+    portObs.observe(portfolioRef.value)
+    observers.value.push(portObs)
   }
 
-  // Ждём обновления DOM для lineRefs
-  await nextTick()
-
-  // Наблюдатели для линий
-  lineRefs.value.forEach((el, index) => {
-    if (el) {
-      const observer = new IntersectionObserver(
-        ([entry]) => {
-          if (entry.isIntersecting) {
-            visibleLines.value[index] = true
-            observer.unobserve(entry.target)
-          }
-        },
-        { threshold: 0.3 }
-      )
-      observer.observe(el)
-      observers.value.push(observer)
-    }
+  // --- C) Observer для каждой строки lines ---
+  lineRefs.value.forEach((el, idx) => {
+    if (!el) return
+    const obs = new IntersectionObserver(
+      ([entry], observer) => {
+        if (entry.isIntersecting) {
+          visibleLines.value[idx] = true
+          observer.unobserve(el)
+        }
+      },
+      { threshold: 0.3 }
+    )
+    obs.observe(el)
+    observers.value.push(obs)
   })
 })
 
 onUnmounted(() => {
-  observers.value.forEach(observer => observer.disconnect())
+  observers.value.forEach(o => o.disconnect())
 })
 </script>

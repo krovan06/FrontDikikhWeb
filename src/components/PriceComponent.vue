@@ -111,7 +111,8 @@
   }
 
   .BtnText {
-    color: aliceblue;
+    color: #08080a;
+    background-color: #15171b;
     font-size: calc((1vh + 1vw) * 0.8);
   }
 

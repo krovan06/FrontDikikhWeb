@@ -1,32 +1,34 @@
 <template>
   <div class="ContactsHolst" ref="contactsHolst">
     <div class="ContactsBlock section" id="contacts-section">
+
       <div class="ContactsContentBlock">
 
-        <div class="MessengersBlock">
-
-          <div class="TestBlock">
-            <div class="IconMessengers">
-              <div class="TextBlock oswald-text">TG</div>
-            </div>
+        <div class="Email Block">
+          <div class="Name oswald-text">Почта</div>
+          <div class="Contacts">
+            <a href="mailto:dikikh2006@gmail.com?subject=Заявка на создание сайта&body=Здравствуйте, ..." target="_blank" class="contacts-link oswald-text">dikikh2006@gmail.com</a>
           </div>
-
-          <div class="TestBlock">
-            <div class="IconMessengers">
-              <div class="TextBlock oswald-text">VK</div>
-            </div>
+        </div>
+        
+        <div class="Phone Block">
+          <div class="Name oswald-text">Телефон</div>
+          <div class="Contacts">
+            <a href="tel:+79145982842" target="_blank" class="contacts-link oswald-text">8 (914) 598-28-42</a>
           </div>
-
-          <div class="TestBlock">
-            <div class="IconMessengers">
-              <div class="TextBlock oswald-text">WH</div>
-            </div>
+        </div>
+        
+        <div class="Social Block">
+          <div class="Name oswald-text">Социальные сети</div>
+          <div class="Contacts">
+            <a href="https://vk.com/krovan06" target="_blank" class="contacts-link oswald-text">VK</a>
+            <a href="tg://resolve?domain=krovan06" target="_blank" class="contacts-link oswald-text">Telegram</a>
+            <a href="https://wa.me/89145982842" target="_blank" class="contacts-link oswald-text">Whatsapp</a>
           </div>
-
-
         </div>
 
       </div>
+
       <div class="AvtorName">
         <div class="AvtorText poppins-text">
           <div class="AvtorText poppins-text WordAnimation">
@@ -34,6 +36,7 @@
           </div>
         </div>
       </div>
+
     </div>
   </div>
 </template>
@@ -41,7 +44,7 @@
 <style scoped>
 .ContactsHolst {
   width: 100%;
-  height: 100vh;
+  height: 80vh;
   background-color: black;
   position: relative;
   overflow: hidden;
@@ -60,101 +63,52 @@
 
 .ContactsContentBlock {
   width: 85%;
-  height: 90%;
-}
-
-.MessengersBlock {
-  width: 30%;
-  height: 100%;
+  height: 65%;
   display: flex;
   align-items: center;
-  justify-content: center;
+  gap: 5vw;
+  display: flex
+}
+
+.Block {
+  height: 80%;
+  display: flex;
   flex-direction: column;
-  gap: 10vh;
-
-  position: relative;
-  z-index: 1;
+  gap: 10px;
 }
 
-.TestBlock {
-  width: 60%;
-}
-
-.TextBlock {
-  color: white;
-}
-
-.IconMessengers {
-  width: 90px;
-  height: 90px;
-  background-color: rgb(21, 23, 27);
-  border-radius: 100%;
-
+.Name {
+  width: 100%;
   display: flex;
   align-items: center;
-  justify-content: center;
-
-  transition: 0.1s;
+  justify-content: left;
+  font-size: 23px;
 }
 
-.IconMessengers:hover {
-  cursor: pointer;
-  background-color: black
+.Contacts {
+  width: 100%;
 }
 
-.IconMessengers:active {
-  background-color: rgb(38, 38, 38);
-}
-
-.ButtonMessengers {
-  margin-right: 10%;
-  width: 60%;
-  height: 60%;
-  background-color: rgb(21, 23, 27);
-  border-radius: 15px;
-  transition: 0.2s;
-
+.contacts-link {
+  width: 100%;
+  text-decoration: none;
+  color: rgb(97, 97, 97);
   display: flex;
-  align-items: center;
-  justify-content: center;
-  color: aliceblue;
-  letter-spacing: 4px;
+  font-size: 18px;
+  justify-content: left;
+  flex-direction: column;
+  transition: 0.3s;
 }
 
-.ButtonAnimation {
-  animation: buttonShow 1s forwards;
-}
-
-@keyframes buttonShow {
-  0% {
-    opacity: 0;
-    width: 10%;
-  }
-
-  100% {
-    opacity: 1;
-    width: 60%;
-  }
-}
-
-.ButtonMessengers:hover {
-  cursor: pointer;
+.contacts-link:hover {
   color: rgb(21, 23, 27);
-  background-color: aliceblue;
-  border: 1px solid rgb(21, 23, 27);
-}
-
-.ButtonMessengers:active {
-  height: 55%;
-  background-color: rgb(151, 158, 164);
-  border: 1px solid rgb(255, 255, 255);
 }
 
 .AvtorName {
   display: flex;
   height: 50vh;
   justify-content: center;
-  margin-top: 70vh;
+  margin-top: 60vh;
   position: absolute;
 }
 
@@ -202,10 +156,39 @@
     filter: blur(0px);
   }
 }
+
+@media (max-width: 700px) {
+
+  .ContactsContentBlock {
+  align-items: center;
+  flex-direction: column;
+  gap: 2vw;
+  display: flex
+}
+
+  .ContactsBlock {
+  width: 100vw;
+  border-radius: 25px;
+  height: 99%;
+}
+
+.Name {
+  justify-content: center;
+}
+
+.contacts-link {
+  font-size: 15px;
+  align-items: center;
+  flex-direction: column;
+}
+
+  .AvtorName {
+  margin-top: 112vh;
+}
+
+.AvtorText {
+  font-size: calc((1vh + 1vw) * 8);
+  letter-spacing: calc((1vh + 1vw) * 1.2);
+}
+}
 </style>
-
-<script>
-  export default {
-
-  }
-</script>
