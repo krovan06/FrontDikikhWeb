@@ -15,13 +15,13 @@
 
 <style scoped>
   .waves-container {
-    width: 100%;
-    max-width: none;
+    height: 100%;
+    max-height: none;
   }
 
   svg {
     width: 100%; 
-    height: 100px; 
+    height: 100%; 
     display: block; 
   }
 
